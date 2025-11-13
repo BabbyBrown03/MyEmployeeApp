@@ -30,6 +30,19 @@
         android:text="Age"
         />
 
+    <Button
+        android:id="@+id/btnUpdateEmployee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Employee"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/btnDeleteEmployee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hapus Employee"
+        android:layout_marginTop="8dp" />
 
 
 </LinearLayout>

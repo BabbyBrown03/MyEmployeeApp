@@ -16,6 +16,9 @@ import com.example.myemployeeapp.network.ApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.app.AlertDialog
+import android.view.LayoutInflater
+import android.widget.EditText
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private val apiClient = ApiClient.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        binding.btnCreate.setOnClickListener {
+            createEmployee()
+        }
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -74,9 +80,9 @@ class MainActivity : AppCompatActivity() {
                     names
                 )
 
-                binding.lvNama.adapter = listAdapter
+                binding.lvUsers.adapter = listAdapter
 
-                binding.lvNama.onItemClickListener = AdapterView.OnItemClickListener{_, _, position, _ ->
+                binding.lvUsers.onItemClickListener = AdapterView.OnItemClickListener{_, _, position, _ ->
                     val id = employee[position].id
                     val intent = Intent(this@MainActivity, DetailEmployeeActivity::class.java)
                     intent.putExtra("EXTRA_ID", id)
@@ -96,4 +102,45 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun createEmployee() {
+        val newEmployee = com.example.myemployeeapp.model.EmployeeRequest(
+            name = "Karyawan Baru",
+            salary = 5000000,
+            age = 25
+        )
+
+        apiClient.createEmployee(newEmployee).enqueue(object :
+            Callback<com.example.myemployeeapp.model.EmployeeDetailResponse> {
+            override fun onResponse(
+                call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>,
+                response: Response<com.example.myemployeeapp.model.EmployeeDetailResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val data = response.body()?.data
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Employee ${data?.name} berhasil dibuat",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    getAllEmployee() // refresh list
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Gagal menambahkan data",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>, t: Throwable) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error: ${t.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+    }
+
 }

@@ -16,16 +16,22 @@ class DetailEmployeeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDataEmployeeBinding
     val client = ApiClient.getInstance()
 
+    private val employeeId: Int = -1
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding.btnUpdateEmployee.setOnClickListener {
+            updateEmployee(employeeId)
+        }
+
+        binding.btnDeleteEmployee.setOnClickListener {
+            deleteEmployee(employeeId)
+        }
+
         binding = ActivityDataEmployeeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        with(binding){
-
-        }
 
         val employeeId = intent.getIntExtra("EXTRA_ID", -1)
         if(employeeId == -1){
@@ -42,6 +48,84 @@ class DetailEmployeeActivity : AppCompatActivity() {
         getEmployeeDetail(employeeId)
 
     }
+    private fun updateEmployee(id: Int) {
+        val updateData = com.example.myemployeeapp.model.EmployeeRequest(
+            name = "Nama Update",
+            salary = 6000000,
+            age = 26
+        )
+
+        client.updateEmployee(id, updateData).enqueue(object :
+            Callback<com.example.myemployeeapp.model.EmployeeDetailResponse> {
+            override fun onResponse(
+                call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>,
+                response: Response<com.example.myemployeeapp.model.EmployeeDetailResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(
+                        this@DetailEmployeeActivity,
+                        "Data berhasil diupdate!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    getEmployeeDetail(id) // refresh tampilan
+                } else {
+                    Toast.makeText(
+                        this@DetailEmployeeActivity,
+                        "Gagal update data",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>,
+                t: Throwable
+            ) {
+                Toast.makeText(
+                    this@DetailEmployeeActivity,
+                    "Error: ${t.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+    }
+
+    private fun deleteEmployee(id: Int) {
+        client.deleteEmployee(id).enqueue(object :
+            Callback<com.example.myemployeeapp.model.EmployeeDetailResponse> {
+            override fun onResponse(
+                call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>,
+                response: Response<com.example.myemployeeapp.model.EmployeeDetailResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(
+                        this@DetailEmployeeActivity,
+                        "Data berhasil dihapus",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish() // kembali ke MainActivity
+                } else {
+                    Toast.makeText(
+                        this@DetailEmployeeActivity,
+                        "Gagal menghapus data",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<com.example.myemployeeapp.model.EmployeeDetailResponse>,
+                t: Throwable
+            ) {
+                Toast.makeText(
+                    this@DetailEmployeeActivity,
+                    "Error: ${t.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
+    }
+
 
     fun getEmployeeDetail(id: Int) {
         val response = client.getEmployeeDetail(id)
